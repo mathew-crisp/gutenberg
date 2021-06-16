@@ -6,7 +6,7 @@ import { pick, defaultTo } from 'lodash';
 /**
  * WordPress dependencies
  */
-import { Platform, useMemo, useCallback } from '@wordpress/element';
+import { Platform, useMemo, useCallback, useRef } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	store as coreStore,
@@ -37,6 +37,8 @@ const EMPTY_DATA = {};
  * @return {Object} Block Editor Settings.
  */
 function useBlockEditorSettings( settings, hasTemplate ) {
+	const richDataLocalCache = useRef( {} );
+
 	const {
 		reusableBlocks,
 		hasUploadPermissions,
@@ -79,6 +81,12 @@ function useBlockEditorSettings( settings, hasTemplate ) {
 	// Temporary home - should this live in `core-data`?
 	const fetchRichUrlData = useCallback(
 		function ( url, fetchOptions = {} ) {
+			// If we have a local cache then it passed last the test below
+			// last time, so we can return early with the cached data here.
+			if ( undefined !== richDataLocalCache.current[ url ] ) {
+				return richDataLocalCache.current[ url ];
+			}
+
 			if ( ! isURL( url ) ) {
 				return Promise.reject(
 					new TypeError( `${ url } is not a valid URL.` )
@@ -119,7 +127,9 @@ function useBlockEditorSettings( settings, hasTemplate ) {
 			}
 
 			// If external then attempt fetch of data.
-			return fetchRemoteUrlData( url, fetchOptions );
+			const data = fetchRemoteUrlData( url, fetchOptions );
+			richDataLocalCache.current[ url ] = data;
+			return data;
 		},
 		[ baseUrl, hasResolvedLocalSiteData ]
 	);
