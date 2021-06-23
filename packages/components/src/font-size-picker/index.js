@@ -21,7 +21,7 @@ import VisuallyHidden from '../visually-hidden';
 
 const DEFAULT_FONT_SIZE = 'default';
 const CUSTOM_FONT_SIZE = 'custom';
-const MAX_FONT_SIZE_DISPLAY = '25px';
+const MAX_FONT_SIZE_DISPLAY = '42px';
 
 function getSelectValueFromFontSize( fontSizes, value ) {
 	if ( value ) {
